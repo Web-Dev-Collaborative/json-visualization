@@ -18,6 +18,7 @@ const Upload = (props) => {
       const res = reader.result
       const parsed = JSON.parse(res);
       store.setJson(parsed);
+      store.setExpression('');
       // redirect the user back to the dashboard
       props.history.push('/');
     }

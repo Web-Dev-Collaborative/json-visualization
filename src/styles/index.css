@@ -53,6 +53,11 @@ body {
   font-family: 'Balsamiq Sans', cursive;
 }
 
+input {
+  font-family: 'Balsamiq Sans', cursive;
+  box-sizing: border-box;
+}
+
 strong { font-weight: 600; }
 
 

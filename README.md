@@ -1,8 +1,4 @@
-##
+## Beautiful JSON Visualizer
 
-1. Implement context API for managing the state
+Upload your JSON document and visualize it, query it using JSONPath.
 
-`
-https://joji.me/en-us/blog/processing-huge-files-using-filereader-readasarraybuffer-in-web-browser/
-https://github.com/JSONPath-Plus/JSONPath
-`

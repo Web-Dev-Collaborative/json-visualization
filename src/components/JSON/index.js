@@ -1,5 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import styled from 'styled-components';
+import Filter from 'components/Filter';
+import { JSONPath } from 'jsonpath-plus';
+import { StoreContext } from 'contexts';
+import { useObserver } from 'mobx-react';
+import { toJS } from 'mobx';
 
 
 
@@ -37,8 +42,11 @@ const Toggle = (props) => {
 
 
 
-
 const generateJSX = (data, output = []) => {
+
+  if ( ! data || data.length === 0 ) {
+    return;
+  }
 
   if ( Array.isArray(data) ) {
     data.forEach( (item, index) => {
@@ -67,30 +75,69 @@ const generateJSX = (data, output = []) => {
 
 
 const JSONRenderer = (props) => {
+  console.log("JSONRenderer", props.json)
   const data = props.json;
-  const json_jsx = generateJSX( data );
+  const store = useContext(StoreContext);
 
-  return (
-    <JSONWrapper>
-      <Toggle title="#root" value={<div className="elements">{ json_jsx }</div>} />
+  return useObserver( () => {
 
-    </JSONWrapper>
-  )
+    let json_jsx = null;
+
+    if ( !store.error && store.expression ) {
+      try {
+        const result = JSONPath({path: store.expression, json: data});
+        if ( result.length === 0 ) {
+          json_jsx = null;
+        } else {
+          json_jsx = generateJSX( result );
+          store.setError('');
+        }
+      } catch (e) {
+        store.setError(e.message);
+      }
+    } else {
+      json_jsx = generateJSX( data );
+    }
+
+    return (
+      <Container>
+        <Filter error={store.error} />
+        <JSONWrapper>
+          { json_jsx ? (
+            <Toggle title="#root" value={<div className="elements">{ json_jsx }</div>} />
+            ) : (
+              <div>No match found!</div>
+            )
+          }
+        </JSONWrapper>
+      </Container>
+    )
+  })
+
+
+  // return (
+  //   <Container>
+  //     <Filter />
+  //     <JSONWrapper>
+  //       <Toggle title="#root" value={<div className="elements">{ json_jsx }</div>} />
+  //     </JSONWrapper>
+  //   </Container>
+  // )
 
 }
 
 
 export default JSONRenderer;
 
+const Container = styled.div`
+  margin-top: 40px;
+`;
 
 const JSONWrapper = styled.div`
-  margin-top: 40px;
   border: 1px solid #ccc;
   padding: 20px;
   max-height: 600px;
   overflow: auto;
-  max-width: 700px;
-  margin-left: -100px;
 
   div.elements div {
     margin-left: 10px;
