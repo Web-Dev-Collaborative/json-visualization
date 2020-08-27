@@ -1,17 +1,38 @@
 import React, { useState, useContext } from 'react';
 import styled from 'styled-components';
 import { StoreContext } from 'contexts';
+import { JSONPath } from 'jsonpath-plus';
+
 
 
 const Filter = (props) => {
   const store = useContext(StoreContext);
 
+  const highlightMatched = ( matched ) => {
+    if ( matched ) {
+      store.setMatched(matched);
+    }
+  }
+
+
   return (
     <Container>
       <input
         onChange={ (e) => {
-          store.setExpression(e.target.value);
-          store.setError('');
+          const expression = e.target.value;
+          store.setExpression(expression);
+          store.setMatched([]);
+          // store.setError('');
+          try {
+            JSONPath({
+              path: expression,
+              json: props.data,
+              // wrap: false,
+              callback: highlightMatched,
+            });
+          } catch (e) {
+            console.log("error occurred", e);
+          }
         }}
         placeholder="Expression"
       />

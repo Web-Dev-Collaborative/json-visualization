@@ -21,7 +21,7 @@ const Dashboard = (props) => {
       <Layout>
         <h1 style={{ fontSize: 30 }}>Dashboard | <Link to="/upload">Upload File</Link></h1>
         { store.json &&
-          <JSONRenderer json={ toJS(store.json) } />
+          <JSONRenderer json={ toJS(store.json) } matched={ toJS(store.matched) } />
         }
       </Layout>
     )
