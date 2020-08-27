@@ -1,26 +1,35 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from 'react';
+import UploadPage from 'ui/Upload';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      json: null,
+    }
+    this.handleJson = this.handleJson.bind(this);
+  }
+
+  handleJson(data) {
+    this.setState({ json: data });
+  }
+
+
+  render() {
+    console.log("this.state.json", this.state.json);
+
+    return (
+      <div>
+        <UploadPage handleJson={this.handleJson} />
+        <div style={{ marginTop: 50,maxWidth: 500, margin: '0 auto' }}>{ JSON.stringify(this.state.json) }</div>
+      </div>
+    )
+
+  }
+
+
 }
+
 
 export default App;
