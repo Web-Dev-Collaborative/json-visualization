@@ -1,21 +1,25 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import styled from 'styled-components';
+import { StoreContext } from 'contexts';
 import Layout from 'ui/Layout';
-import { useDropzone } from 'react-dropzone';
 import Dropzone from 'react-dropzone'
 
 
 const Upload = (props) => {
+  const store = useContext(StoreContext);
 
 
   const handleDrop = (files) => {
     const file = files[0];
     if ( ! file ) { return; }
+
     const reader = new FileReader();
     reader.onload = () => {
       const res = reader.result
       const parsed = JSON.parse(res);
-      props.handleJson && props.handleJson(parsed);
+      store.setJson(parsed);
+      // redirect the user back to the dashboard
+      props.history.push('/');
     }
     // let's start with a very non scalable implementation - for testing!
     reader.readAsText(file);
@@ -24,7 +28,7 @@ const Upload = (props) => {
 
   return (
     <Layout>
-    <Container>
+    <div>
       <Description>
         Using this application you can easily query JSON object using the <strong>JSONPath</strong> with an instant and beautiful visualization.
       </Description>
@@ -47,17 +51,13 @@ const Upload = (props) => {
         )}
       </Dropzone>
 
-    </Container>
+    </div>
     </Layout>
   )
 }
 
 export default Upload;
 
-const Container = styled.div`
-  max-width: 500px;
-  margin: 0 auto;
-`;
 
 const Description = styled.div`
   font-size: 22px;
@@ -88,7 +88,7 @@ const UploadContainer = styled.div`
     border-color: #333;
   }
   &:active {
-    background: red;
+    background: #ccc;
   }
 }
 `;

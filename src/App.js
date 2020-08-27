@@ -1,35 +1,21 @@
-import React, { Component } from 'react';
+import React from 'react';
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import { StoreProvider } from 'contexts';
+import DashboardPage from 'ui/Dashboard';
 import UploadPage from 'ui/Upload';
 
-class App extends Component {
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      json: null,
-    }
-    this.handleJson = this.handleJson.bind(this);
-  }
-
-  handleJson(data) {
-    this.setState({ json: data });
-  }
-
-
-  render() {
-    console.log("this.state.json", this.state.json);
-
-    return (
-      <div>
-        <UploadPage handleJson={this.handleJson} />
-        <div style={{ marginTop: 50,maxWidth: 500, margin: '0 auto' }}>{ JSON.stringify(this.state.json) }</div>
-      </div>
-    )
-
-  }
-
-
+const App = () => {
+  return (
+    <StoreProvider>
+    <Router>
+      <Switch>
+        <Route exact path="/" component={ DashboardPage } />
+        <Route path="/upload" component={ UploadPage } />
+      </Switch>
+    </Router>
+    </StoreProvider>
+  )
 }
-
 
 export default App;

@@ -8,7 +8,9 @@ const Layout = (props) => {
     <div>
       <Header />
       <Content>
+        <Container>
         { props.children }
+        </Container>
       </Content>
     </div>
   )
@@ -20,4 +22,8 @@ export default Layout;
 const Content = styled.div`
   margin-top: 50px;
   padding: 50px;
+`;
+const Container = styled.div`
+  max-width: 500px;
+  margin: 0 auto;
 `;

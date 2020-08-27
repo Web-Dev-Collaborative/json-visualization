@@ -1,11 +1,12 @@
 import React from 'react';
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 
 
 const HeaderComponent = (props) => {
   return (
     <Header>
-      <AppName>JSONPath Visualizer</AppName>
+      <AppName><Link to="/">JSONPath Visualizer</Link></AppName>
     </Header>
   )
 }
