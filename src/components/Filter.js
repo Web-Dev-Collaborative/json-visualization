@@ -1,5 +1,6 @@
 import React, { useState, useContext } from 'react';
 import styled from 'styled-components';
+import { useObserver } from 'mobx-react';
 import { StoreContext } from 'contexts';
 import { JSONPath } from 'jsonpath-plus';
 
@@ -15,30 +16,35 @@ const Filter = (props) => {
   }
 
 
-  return (
-    <Container>
-      <input
-        onChange={ (e) => {
-          const expression = e.target.value;
-          store.setExpression(expression);
-          store.setMatched([]);
-          // store.setError('');
-          try {
-            JSONPath({
-              path: expression,
-              json: props.data,
-              // wrap: false,
-              callback: highlightMatched,
-            });
-          } catch (e) {
-            console.log("error occurred", e);
-          }
-        }}
-        placeholder="Expression"
-      />
-      { props.error && <Error>{ props.error }</Error> }
-    </Container>
-  )
+  return useObserver( () => {
+
+    return (
+      <Container>
+        <input
+          onChange={ (e) => {
+            const expression = e.target.value;
+            store.setExpression(expression);
+            store.resetMatched();
+            store.setError('');
+            try {
+              JSONPath({
+                path: expression,
+                json: props.data,
+                // wrap: false,
+                callback: highlightMatched,
+              });
+            } catch (e) {
+              console.log("error occurred", e);
+              store.setError(e.message);
+            }
+          }}
+          placeholder="Expression"
+        />
+        { store.error && <Error>{ store.error }</Error> }
+      </Container>
+    )
+
+  })
 
 }
 
