@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
-import { StoreProvider } from 'contexts';
+import { StoreProvider } from 'global/contexts';
 import DashboardPage from 'ui/Dashboard';
 import UploadPage from 'ui/Upload';
 

@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import styled from 'styled-components';
-import { StoreContext } from 'contexts';
+import { StoreContext } from 'global/contexts';
 import Layout from 'ui/Layout';
 import Dropzone from 'react-dropzone'
 

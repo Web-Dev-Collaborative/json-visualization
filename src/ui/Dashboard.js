@@ -3,7 +3,7 @@ import { Redirect } from 'react-router-dom';
 // import styled from 'styled-components';
 import { useObserver } from 'mobx-react';
 import { toJS } from 'mobx';
-import { StoreContext } from 'contexts';
+import { StoreContext } from 'global/contexts';
 import Layout from 'ui/Layout';
 import JSONRenderer from 'components/JSON';
 import { Link } from 'react-router-dom';

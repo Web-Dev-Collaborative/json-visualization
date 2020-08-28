@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import styled from 'styled-components';
 import { useObserver } from 'mobx-react';
-import { StoreContext } from 'contexts';
+import { StoreContext } from 'global/contexts';
 import { JSONPath } from 'jsonpath-plus';
 
 
@@ -9,9 +9,14 @@ import { JSONPath } from 'jsonpath-plus';
 const Filter = (props) => {
   const store = useContext(StoreContext);
 
-  const highlightMatched = ( matched ) => {
+  const highlightMatched = ( matched, type, info ) => {
+    // console.log("highlightMatched||matched", matched);
+    // console.log("highlightMatched||type", type);
+    // console.log("highlightMatched||info", info);
+    // console.log("info.path", info.path)
     if ( matched ) {
-      store.setMatched(matched);
+      // store.setMatched(matched);
+      store.setMatched(info.path);
     }
   }
 
