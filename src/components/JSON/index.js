@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import Filter from 'components/Filter';
 import Toggle from 'components/Toggle';
-import { JSONPath } from 'jsonpath-plus';
+
 
 
 // find all matches based on the path provided by JSONPath
@@ -62,6 +62,7 @@ const JSONRenderer = (props) => {
   const matched = props.matched;
   const json_jsx = generateJSX( data, matched );
 
+
   return (
     <Container>
       <Filter data={data} />
@@ -99,7 +100,8 @@ const JSONWrapper = styled.div`
     }
 
     &.matched {
-      background: yellow;
+      background: #fffff3;
+      .title, .value { color: red; }
     }
     .title {
       cursor: default;

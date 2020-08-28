@@ -1,30 +1,98 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import styled from 'styled-components';
 import { StoreContext } from 'global/contexts';
 import Layout from 'ui/Layout';
 import Dropzone from 'react-dropzone'
+import cogoToast from 'cogo-toast';
+
+
+
+const sampleJSON = `{"store":{"book":[{"category":"reference","author":"Nigel Rees","title":"Sayings of the Century","price":8.95},{"category":"fiction","author":"Evelyn Waugh","title":"Sword of Honour","price":12.99},{"category":"fiction","author":"Herman Melville","title":"Moby Dick","isbn":"0-553-21311-3","price":8.99},{"category":"fiction","author":"J. R. R. Tolkien","title":"The Lord of the Rings","isbn":"0-395-19395-8","price":22.99}],"bicycle":{"color":"red","price":19.95}}}`;
+
 
 
 const Upload = (props) => {
   const store = useContext(StoreContext);
-
+  const [ url, setURL ] = useState('');
 
   const handleDrop = (files) => {
     const file = files[0];
     if ( ! file ) { return; }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const res = reader.result
-      const parsed = JSON.parse(res);
-      store.setJson(parsed);
-      store.setExpression('');
-      // redirect the user back to the dashboard
-      props.history.push('/');
+    const fileSize = file.size;
+    const chunkSize = 64 * 1024;
+    let offset = 0;
+    let result = '';
+    const callback = (str) => {
+      result += str;
     }
-    // let's start with a very non scalable implementation - for testing!
-    reader.readAsText(file);
+
+    const handleFileReaderLoad = (evt) => {
+      if ( evt.target.error == null ) {
+        offset += evt.target.result.length;
+        callback(evt.target.result);
+      } else {
+        console.log("Read error: " + evt.target.error);
+        cogoToast.error(`Error occurred: ${evt.target.error}`);
+        return;
+      }
+
+      if ( offset >= fileSize ) {
+        console.log("Done reading file");
+        try {
+          const parsed = JSON.parse(result);
+          cogoToast.success('Successfully uploaded The JSON file.');
+          store.setJson(parsed);
+          props.history.push('/'); // redirect the user back to the dashboard
+        } catch (e) {
+          cogoToast.error(`Error occurred: ${e.message}`);
+        }
+        return;
+      }
+
+      // of to the next chunk
+      chunkReaderBlock(offset, chunkSize, file);
+    }
+
+    const chunkReaderBlock = (_offset, length, _file) => {
+      const reader = new FileReader();
+      const blob = _file.slice(_offset, length + _offset);
+      reader.onload = handleFileReaderLoad;
+      reader.readAsText(blob);
+    }
+
+    // now let's start the read with the first block
+    chunkReaderBlock( offset, chunkSize, file );
+
   }
+
+  const loadSampleJson = () => {
+    const parsed = JSON.parse(sampleJSON);
+    store.setJson(parsed);
+    cogoToast.success('Successfully loaded sample JSON file.');
+    props.history.push('/');
+  }
+
+
+  const fetchJsonFile = async () => {
+    if ( ! url ) { return cogoToast.warn('Please enter a valid url first'); }
+    const { hide } = cogoToast.loading("Fetching json file, please wait...", { hideAfter: 0 });
+    const corsFix = `https://cors-anywhere.herokuapp.com/`;
+
+    try {
+      const res = await fetch(`${corsFix}${url}`);
+      const json = await res.json();
+      hide();
+      store.setJson(json);
+      cogoToast.success('Successfully fetched the JSON file from given URL.');
+      props.history.push('/');
+    } catch (e) {
+      hide();
+      cogoToast.error(`Error occurred: ${e.message}`);
+    }
+
+  }
+
 
 
   return (
@@ -51,6 +119,15 @@ const Upload = (props) => {
           </UploadContainer>
         )}
       </Dropzone>
+
+      <Title style={{ marginTop: 40 }}><strong>OR</strong> - Fetch JSON file from URL</Title>
+      <JSONFromURL>
+        <input placeholder="http://" onChange={ ({ target: { value } }) => { setURL(value) } } />
+        <Button onClick={ fetchJsonFile }>Fetch</Button>
+      </JSONFromURL>
+
+      <Title style={{ marginTop: 40 }}><strong>OR</strong> - Load a Sample JSON File</Title>
+      <Button onClick={ loadSampleJson }>Load Sample JSON File</Button>
 
     </div>
     </Layout>
@@ -93,4 +170,35 @@ const UploadContainer = styled.div`
   }
 }
 `;
+
+
+const JSONFromURL = styled.div`
+  display: flex;
+  flex-direction: row;
+  input {
+    width: 100%;
+    padding: 5px 10px;
+    border: 2px solid #999;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-right: 10px;
+    outline: 0;
+    &:focus { border: 2px solid #000; }
+  }
+`;
+
+
+const Button = styled.button`
+  border: none;
+  padding: 10px 20px;
+  font-weight: 600;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  outline: 0;
+  transition: all .3s;
+  &:hover { background: #000; color: #fff; border-color: transparent; }
+`;
+
 

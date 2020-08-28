@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useContext } from 'react';
 import styled from 'styled-components';
 import { useObserver } from 'mobx-react';
 import { StoreContext } from 'global/contexts';
@@ -64,9 +64,11 @@ const Container = styled.div`
     width: 100%;
     font-size: 16px;
     cursor: pointer;
-    border; 1px solid #ccc;
+    border: 2px solid #ccc;
     padding: 10px 20px;
     border-radius: 4px;
+    outline: 0;
+    &:focus { border: 2px solid #000; }
   }
 
   button {

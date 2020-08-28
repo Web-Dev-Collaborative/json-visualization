@@ -1,62 +1,56 @@
-
-
-// workimg
-
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import Filter from 'components/Filter';
+import Toggle from 'components/Toggle';
+import { JSONPath } from 'jsonpath-plus';
 
 
-
-const Toggle = (props) => {
-  const [ visible, setVisible ] = useState(false)
-
-  if ( props.value ) {
-    return (
-      <div className="toggle-item">
-        <div className="title" onClick={ () => { setVisible(!visible) } }>{visible ? '-' : '+'} { props.title }</div>
-        { visible &&
-          <div className="value">{ props.value }</div>
-        }
-      </div>
-    )
-  } else {
-    return (
-      <div className="item">
-        <div className="title-2">{ props.title }</div>
-      </div>
-    )
-  }
-
+// find all matches based on the path provided by JSONPath
+const matchByPath = (item, matches, path) => {
+  if ( matches.length === 0 ) { return false; }
+  if ( matches.includes(`$${path}`) ) { return true; }
+  return false;
 }
 
 
+// Generate the JSX components which we will render in the UI
+const generateJSX = (data, matched, output = [], path='') => {
 
-
-
-
-const generateJSX = (data, output = []) => {
+  if ( ! data || data.length === 0 ) {
+    return;
+  }
 
   if ( Array.isArray(data) ) {
     data.forEach( (item, index) => {
       if ( typeof item === 'object' ) {
-        const sub = generateJSX(item);
-        output.push(<Toggle key={index} title={index} value={sub} />)
+        let currentPath = '';
+        if ( typeof data[index] === 'object' ) {
+          currentPath = path+`[${index}]`;
+        } else { currentPath = path+`['${data[index]}']`; }
+        const sub = generateJSX(item, matched, [], currentPath);
+        const match = matchByPath( data[index], matched, currentPath );
+        output.push(<Toggle key={index} match={match} title={index} value={sub} />)
       } else {
-        output.push(<Toggle key={index} title={item} clickable={false} />)
+        const currentPath = path+`[${index}]`;
+        const match = matchByPath( data[index], matched, currentPath );
+        output.push(<Toggle inline={true} match={match} key={index} title={index} value={item} />)
       }
     });
   } else if ( typeof data === 'object' ) {
     Object.keys(data).forEach( (item, index) => {
+      const currentPath = path+`['${item}']`;
       if ( typeof data[item] === 'object' ) {
-        const sub = generateJSX(data[item]);
-        output.push(<Toggle key={index} title={item} value={sub} />)
+        const sub = generateJSX(data[item], matched, [], currentPath);
+        const match = matchByPath( item, matched, currentPath );
+        output.push(<Toggle key={index} match={match} title={item} value={sub} />)
       } else {
-        output.push(<Toggle key={index} title={item} value={data[item]} />)
+        const match = matchByPath( item, matched, currentPath );
+        output.push(<Toggle inline={true} match={match} key={index} title={item} value={data[item]} />)
       }
     });
 
   } else {
-    console.log("else", data);
+    // do nothing!
   }
 
   return output;
@@ -65,13 +59,16 @@ const generateJSX = (data, output = []) => {
 
 const JSONRenderer = (props) => {
   const data = props.json;
-  const json_jsx = generateJSX( data );
+  const matched = props.matched;
+  const json_jsx = generateJSX( data, matched );
 
   return (
-    <JSONWrapper>
-      <Toggle title="#root" value={<div className="elements">{ json_jsx }</div>} />
-
-    </JSONWrapper>
+    <Container>
+      <Filter data={data} />
+      <JSONWrapper>
+        <Toggle title="JSONDocument" value={<div className="elements">{ json_jsx }</div>} />
+      </JSONWrapper>
+    </Container>
   )
 
 }
@@ -79,188 +76,41 @@ const JSONRenderer = (props) => {
 
 export default JSONRenderer;
 
+const Container = styled.div`
+  margin-top: 40px;
+`;
 
 const JSONWrapper = styled.div`
-  margin-top: 40px;
   border: 1px solid #ccc;
   padding: 20px;
   max-height: 600px;
   overflow: auto;
-  max-width: 700px;
-  margin-left: -100px;
 
   div.elements div {
     margin-left: 10px;
     border-left: 1px dotted #ccc;
   }
 
-  .flex {
-    display: flex;
-    justify-content: flex-start;
-    flex-direction: column;
-    &.row { flex-direction: row; }
-
-    .key { font-weight: 600; }
-    .value { color: #999; marign: 0; }
-  }
-
-
-
-
-
-
-
   .toggle-item {
+    &.inline {
+      display: flex;
+      .title { margin-right: 5px; }
+      .value { align-self: center; border: none; margin: 0; color: #009688; }
+    }
+
+    &.matched {
+      background: yellow;
+    }
     .title {
-      cursor: pointer;
-      font-size: 20px;
-    }
-    .value {
-    }
-    .title-2 {
       cursor: default;
       font-size: 16px;
+      &.link {
+        cursor: pointer;
+        color: blue;
+      }
     }
-
+    .value {}
     & .toggle-item { border: none; }
-
   }
-
-
-
 
 `;
-
-
-    // border: 1px solid #999;
-
-
-// const JSONWrapper2 = styled.div``;
-
-
-
-
-
-
-
-
-
-const generateJSX = (data, output = []) => {
-
-  if ( Array.isArray(data) ) {
-    data.forEach( (item, index) => {
-      if ( typeof data[item] === 'object' ) {
-        const sub = generateJSX(data[item]);
-        output.push(
-          <div className="flex" key={index}>
-            <div className="key">+ {item}</div>
-            <div>{sub}</div>
-          </div>
-        )
-      } else {
-        output.push(
-          <div className="flex row" key={index}>
-            <div className="key">{index}</div>
-            <div className="value">{ item }</div>
-          </div>
-        )
-      }
-    });
-  } else if ( typeof data === 'object' ) {
-    Object.keys(data).forEach( (item, index) => {
-      if ( typeof data[item] === 'object' ) {
-        const sub = generateJSX(data[item]);
-        output.push(
-          <div className="flex" key={index}>
-            <div className="key">+ {item}</div>
-            <div>{sub}</div>
-          </div>
-        )
-      } else {
-        output.push(
-          <div className="flex row" key={index}>
-            <div className="key">{item}</div>
-            <div className="value">{ data[item] }</div>
-          </div>
-        )
-      }
-    });
-
-  } else {
-    console.log("else", data);
-  }
-
-  return output;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-const generateJSX = (data, output = []) => {
-  if ( Array.isArray(data) ) {
-    data.forEach( (item, index) => {
-      // console.log("array-item", item, data[index])
-      if ( typeof item === 'object' ) {
-        const sub = generateJSX(item);
-        output.push(
-          <div key={index}>
-            <div>+-</div>
-            <div>{sub}</div>
-          </div>
-        )
-      } else {
-        output.push(
-          <div key={index}>
-            <div>{item}</div>
-          </div>
-        )
-      }
-    });
-  } else if ( typeof data === 'object' ) {
-    Object.values(data).forEach( (item, index) => {
-      console.log("xxx-item", item)
-      if ( typeof item === 'object' ) {
-        const sub = generateJSX(item);
-        output.push(
-          <div key={index}>
-            <div>+ { Array.isArray(item) ? 'DHRUV' : Object.keys(item)[0] }</div>
-            <div>{sub}</div>
-          </div>
-        )
-      } else {
-        output.push(
-          <div key={index}>
-            <div>{item}</div>
-          </div>
-        )
-      }
-    });
-  } else {
-    output.push(<p>{data}</p>);
-  }
-
-  return output;
-}

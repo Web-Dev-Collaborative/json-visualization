@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { Redirect } from 'react-router-dom';
-// import styled from 'styled-components';
+import styled from 'styled-components';
 import { useObserver } from 'mobx-react';
 import { toJS } from 'mobx';
 import { StoreContext } from 'global/contexts';
@@ -19,7 +19,7 @@ const Dashboard = (props) => {
 
     return (
       <Layout>
-        <h1 style={{ fontSize: 30 }}>Dashboard | <Link to="/upload">Upload File</Link></h1>
+        <Heading>Dashboard<Link to="/upload">Visualize New File</Link></Heading>
         { store.json &&
           <JSONRenderer json={ toJS(store.json) } matched={ toJS(store.matched) } />
         }
@@ -32,3 +32,18 @@ const Dashboard = (props) => {
 }
 
 export default Dashboard;
+
+const Heading = styled.div`
+  font-size: 30px;
+  line-height: 100%;
+  display: flex;
+  justify-content: space-between;
+
+
+  a {
+    color: #000;
+    text-decoration: underline;
+    font-size: 20px;
+  }
+
+`;
