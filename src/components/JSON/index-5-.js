@@ -10,21 +10,21 @@ const ITEM_DEPTH_MARGIN = 20;
 
 
 
-const flattenJson = ( json, matched, output=[], path=``, depth=0, _match=false ) => {
+const flattenJson = ( json, output=[], path=``, depth=0 ) => {
   if ( ! json ) { return []; }
+  // console.log("flattenJson:::json, output, path",json, output, path);
+
 
   // provided json is an array
   if ( typeof json === 'object' && Array.isArray(json) ) {
     // console.log("json::array");
     json.forEach( (item, index) => {
       const currentPath = path+`[${index}]`;
-      const match = matched.includes(`$${currentPath}`) || _match;
-
       if ( typeof json[index] !== 'object' ) {
-        output.push({ path: currentPath, title: index, value: item, depth: depth, hasChildren: true, open: true, match: match });
+        output.push({ path: currentPath, title: index, value: item, depth: depth, hasChildren: true, open: true, visible: true });
       } else {
-        output.push({ path: currentPath, title: index, value: '', depth: depth, hasChildren: true, open: true, match: match });
-        flattenJson( item, matched, output, currentPath, depth+1, match );
+        output.push({ path: currentPath, title: index, value: '', depth: depth, hasChildren: true, open: true, visible: true });
+        flattenJson( item, output, currentPath, depth+1 );
       }
     });
   }
@@ -34,13 +34,11 @@ const flattenJson = ( json, matched, output=[], path=``, depth=0, _match=false )
 
     Object.keys(json).forEach( (item, index) => {
       const currentPath = path + `['${item}']`;
-      const match = matched.includes(`$${currentPath}`) || _match;
-
       if ( typeof json[item] === 'object' ) {
-        output.push({ path: currentPath, title: item, value: '', depth: depth, hasChildren: true, open: true, match: match });
-        const children = flattenJson( json[item], matched, output, currentPath, depth+1, match );
+        output.push({ path: currentPath, title: item, value: '', depth: depth, hasChildren: true, open: true, visible: true });
+        const children = flattenJson( json[item], output, currentPath, depth+1 );
       } else {
-        output.push({ path: currentPath, title: item, value: json[item], depth: depth, visible: true, match: match });
+        output.push({ path: currentPath, title: item, value: json[item], depth: depth, visible: true });
       }
     });
   }
@@ -54,28 +52,30 @@ const flattenJson = ( json, matched, output=[], path=``, depth=0, _match=false )
 
 
 
-const togglePath = (list, togglePaths, origList) => {
-  let output = [ ...origList ];
+const togglePath = (currentPath, list, togglePaths, origList) => {
+  console.log("togglePaths", togglePaths);
 
-  if ( togglePaths.length > 0 ) {
-    togglePaths.map( path => {
-      const nodeIndex = output.findIndex( item => item.path === path );
-      const node = { ...output[nodeIndex] };
-      node.open = false;
-      output[nodeIndex] = node;
+  const output = [ ...list ];
 
-      output = output.filter( item => {
-        if ( item.path === path ) { return true; }
-        if ( item.path.includes(path) ) { return false; }
-        return true;
-      });
+  togglePaths.map( path => {
+    const nodeIndex = output.findIndex( item => item.path === currentPath );
+    output[nodeIndex].open = ! output[nodeIndex].open;
 
-    });
+  });
 
-    return output;
-  }
 
-  return origList;
+
+  // toggle the clicked element
+  const nodeIndex = output.findIndex( item => item.path === currentPath );
+  output[nodeIndex].open = ! output[nodeIndex].open;
+
+
+  // const filteredNodes = output.filter( item => {
+  //   if ( item.path === path ) { return true; }
+  //   return ! item.path.includes(path);
+  // });
+
+  return filteredNodes;
 }
 
 
@@ -83,7 +83,6 @@ const togglePath = (list, togglePaths, origList) => {
 
 
 const JSONRenderer = (props) => {
-
   const [ origList, setOrigList ] = useState([]);
   const [ list, setList ] = useState([]);
   const [ togglePaths, setTogglePaths ] = useState([]);
@@ -93,10 +92,10 @@ const JSONRenderer = (props) => {
 
 
   useEffect( () => {
-    const flattened = flattenJson(data, matched);
+    const flattened = flattenJson(data);
     setList(flattened);
     setOrigList(flattened);
-  }, [matched] );
+  }, [] );
 
 
 
@@ -107,7 +106,7 @@ const JSONRenderer = (props) => {
     } else { _paths.push(path); }
     setTogglePaths(_paths)
 
-    const json = togglePath(list, _paths, origList);
+    const json = togglePath(path, list, _paths, origList);
     setList(json);
   }
 

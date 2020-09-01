@@ -19,6 +19,8 @@ const Upload = (props) => {
     const file = files[0];
     if ( ! file ) { return; }
 
+    const { hide } = cogoToast.loading("Processing json file, please wait...", { hideAfter: 0 });
+
     const fileSize = file.size;
     const chunkSize = 64 * 1024;
     let offset = 0;
@@ -38,13 +40,15 @@ const Upload = (props) => {
       }
 
       if ( offset >= fileSize ) {
-        console.log("Done reading file");
+        // console.log("Done reading file");
         try {
           const parsed = JSON.parse(result);
-          cogoToast.success('Successfully uploaded The JSON file.');
+          hide();
+          cogoToast.success('Successfully processed The JSON file.');
           store.setJson(parsed);
           props.history.push('/'); // redirect the user back to the dashboard
         } catch (e) {
+          hide();
           cogoToast.error(`Error occurred: ${e.message}`);
         }
         return;

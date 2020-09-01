@@ -5,6 +5,7 @@ import { useObserver } from 'mobx-react';
 import { toJS } from 'mobx';
 import { StoreContext } from 'global/contexts';
 import Layout from 'ui/Layout';
+// import JSONRenderer from 'components/JSON';
 import JSONRenderer from 'components/JSON';
 import { Link } from 'react-router-dom';
 
@@ -18,11 +19,13 @@ const Dashboard = (props) => {
     if ( ! store.json ) { return <Redirect to="/upload" /> }
 
     return (
-      <Layout>
+      <Layout containerWidth={1000}>
         <Heading>Dashboard<Link to="/upload">Visualize New File</Link></Heading>
+
         { store.json &&
           <JSONRenderer json={ toJS(store.json) } matched={ toJS(store.matched) } />
         }
+
       </Layout>
     )
   })

@@ -8,7 +8,7 @@ const Layout = (props) => {
     <div>
       <Header />
       <Content>
-        <Container>
+        <Container style={{ maxWidth: props.containerWidth || 500 }}>
         { props.children }
         </Container>
       </Content>
