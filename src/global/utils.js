@@ -56,9 +56,7 @@ export const togglePath = (list, togglePaths, origList) => {
         if ( item.path.includes(path) ) { return false; }
         return true;
       });
-
     });
-
     return output;
   }
 

@@ -22,7 +22,7 @@ const JSONRenderer = (props) => {
     const flattened = flattenJson(data, matched);
     setList(flattened);
     setOrigList(flattened);
-  }, [matched] );
+  }, [data,matched] );
 
 
 
